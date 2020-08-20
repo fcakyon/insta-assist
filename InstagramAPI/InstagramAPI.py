@@ -108,8 +108,8 @@ class InstagramAPI:
 
                     self.syncFeatures()
                     self.autoCompleteUserList()
-                    self.timelineFeed()
-                    self.getv2Inbox()
+                    #self.timelineFeed()
+                    #self.getv2Inbox()
                     self.getRecentActivity()
                     print("Login success!\n")
                     return True
@@ -755,6 +755,15 @@ class InstagramAPI:
     def getv2Inbox(self):
         inbox = self.SendRequest('direct_v2/inbox/?')
         return inbox
+
+    def getNewsInbox(self):
+        inbox = self.SendRequest('news/inbox/')
+        return inbox
+
+    def ranked_recipients(self):
+        ranked_recipients = self.SendRequest('direct_share/recent_recipients/')
+        return ranked_recipients
+        
 
     def getv2Threads(self, thread, cursor=None):
         endpoint = 'direct_v2/threads/{0}'.format(thread)
