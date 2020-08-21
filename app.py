@@ -9,8 +9,8 @@ app = Flask(__name__)
 @app.route("/")
 def hello():
     liked_media_dict = load_json(config.json_path)
-    # liked_media_list = liked_media_dict["clean"]
-    liked_media_list = liked_media_dict
+    liked_media_list = liked_media_dict["clean"]
+    # liked_media_list = liked_media_dict
 
     def sort_function(e):
         return e["timestamp"]
@@ -20,4 +20,4 @@ def hello():
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0")

@@ -20,4 +20,3 @@ liked_media_dict = get_liked_media_list_from_username(igapi, username)
 
 json_path = config.json_path
 save_json(liked_media_dict, json_path)
-clean_liked_media_list
