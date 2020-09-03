@@ -7,6 +7,8 @@ from datetime import datetime
 
 # from InstagramAPI import InstagramAPI
 
+INSTAGRAM_DEFAULT_PROFIL_PIC_URL = "https://scontent-maa2-1.cdninstagram.com/v/t51.2885-19/44884218_345707102882519_2446069589734326272_n.jpg?_nc_ht=scontent-maa2-1.cdninstagram.com&_nc_ohc=OU-5fMy1ffUAX-o-6ty&oh=9438c1dcdb6c5d4150e5f396a64eeadb&oe=5F7A818F&ig_cache_key=YW5vbnltb3VzX3Byb2ZpbGVfcGlj.2"
+
 
 def get_future_time_string(seconds_from_now):
     now_in_seconds = time.mktime(time.localtime())
@@ -78,6 +80,23 @@ def get_all_followings(igapi, target_userid):
         }
         following_list.append(user)
     return following_list
+
+
+def get_all_followers(igapi, target_userid):
+    """
+    Returns a list of {"username": "", "userid": 0, "is_private": false, "full_name": ""}
+    """
+    follower_list = []
+    current_followers_list = igapi.getTotalFollowers(target_userid)
+    for follower in current_followers_list:
+        user = {
+            "username": follower["username"],
+            "userid": follower["pk"],
+            "is_private": follower["is_private"],
+            "full_name": follower["full_name"],
+        }
+        follower_list.append(user)
+    return follower_list
 
 
 def get_following_liked_medias(igapi, following_list, target_username):
@@ -165,6 +184,13 @@ def get_liked_media_dict_path(username):
     return liked_media_dict_path
 
 
+def get_follower_likes_list_path(username):
+    follower_likes_list_path = os.path.join(
+        "data", username, "follower_likes_list.json"
+    )
+    return follower_likes_list_path
+
+
 def get_user_likes_per_account(liked_media_dict):
     """
     Returns a list of {"username": "", "number_of_liked_posts": 0, "liked_media_list": [], "profile_pic_url": "", "profile_url": ""}
@@ -204,3 +230,84 @@ def get_user_likes_per_account(liked_media_dict):
     ]
 
     return user_likes_per_account_list
+
+
+def get_follower_likes_list(igapi, username):
+    user_id = get_userid_from_username(igapi, username)
+    follower_list = get_all_followers(igapi, user_id)
+    follower_dict = dict()
+    for ind in range(len(follower_list)):
+        follower_username = follower_list[ind]["username"]
+        follower_list[ind]["number_of_liked_posts"] = 0
+        follower_list[ind]["profile_pic_url"] = INSTAGRAM_DEFAULT_PROFIL_PIC_URL
+        follower_dict[follower_username] = follower_list[ind]
+
+    response = igapi.getUserFeed(user_id)
+    user_medias = igapi.LastJson["items"]
+    media_id_list = [media["pk"] for media in user_medias]
+
+    for media_id in media_id_list:
+        response = igapi.getMediaLikers(media_id)
+        media_likers_list = igapi.LastJson["users"]
+        for media_liker in media_likers_list:
+            media_liker_username = media_liker["username"]
+            media_liker_profile_pic_url = media_liker["profile_pic_url"]
+            if media_liker_username in follower_dict.keys():
+                follower_dict[media_liker_username]["number_of_liked_posts"] += 1
+                follower_dict[media_liker_username][
+                    "profile_pic_url"
+                ] = media_liker_profile_pic_url
+
+    # create list with structure: [{"username": "", "full_name": "", "number_of_liked_posts": 0, "profile_url": "", "profile_pic_url": ""}]
+    follower_likes_list = [
+        {
+            "username": follower_username,
+            "full_name": follower_dict[follower_username]["full_name"],
+            "number_of_liked_posts": follower_dict[follower_username][
+                "number_of_liked_posts"
+            ],
+            "profile_url": "https://www.instagram.com/" + follower_username,
+            "profile_pic_url": follower_dict[follower_username]["profile_pic_url"],
+        }
+        for follower_username in follower_dict.keys()
+    ]
+    return follower_likes_list
+
+
+def get_hd_profile_pic(igapi, username):
+    """
+    Returns {"user_id": 0, "username": "", full_name": "", "hd_profile_pic_url": "",
+            "is_private":": false, "is_business": false, "profile_url": ""}
+    """
+    user_id = get_userid_from_username(igapi, username)
+    response = igapi.getUsernameInfo(user_id)
+    hd_profile_pic_url = igapi.LastJson["user"]["hd_profile_pic_url_info"]["url"]
+    full_name = igapi.LastJson["user"]["full_name"]
+    is_private = igapi.LastJson["user"]["is_private"]
+    is_business = igapi.LastJson["user"]["is_business"]
+    profile_url = ("https://www.instagram.com/" + username,)
+    hd_profile_pic_dict = {
+        "user_id": user_id,
+        "hd_profile_pic_url": hd_profile_pic_url,
+        "full_name": full_name,
+        "is_private": is_private,
+        "is_business": is_business,
+        "profile_url": profile_url,
+    }
+    return hd_profile_pic_dict
+
+
+if __name__ == "__main__":
+    # from igapi import igapi
+
+    username = "fcakyon"
+    # get_hd_profile_pic(igapi, username)
+
+    follower_likes_list_path = get_follower_likes_list_path(username)
+    follower_likes_list = load_json(follower_likes_list_path)
+
+    def sort_function(e):
+        return e["number_of_liked_posts"]
+
+    follower_likes_list.sort(reverse=True, key=sort_function)
+    follower_likes_list

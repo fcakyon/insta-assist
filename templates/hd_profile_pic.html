@@ -1,0 +1,118 @@
+<!-- InstaAssist Tool. -->
+<!-- Code written by fcakyon, 2020. -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>InstaAssist</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+        integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+    <style>
+        .jumbotron {
+            padding-top: 50px;
+            padding-bottom: 50px;
+        }
+
+        .jumbotron p {
+            margin-bottom: 10px;
+        }
+
+        .alert {
+            padding-top: 10px;
+            padding-bottom: 0px;
+            margin-bottom: 10px;
+        }
+    </style>
+    <style>
+        .bd-placeholder-img {
+            font-size: 1.125rem;
+            text-anchor: middle;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        @media (min-width: 768px) {
+            .bd-placeholder-img-lg {
+                font-size: 3.5rem;
+            }
+        }
+    </style>
+    <!-- Custom styles for this template -->
+    <!-- <link href="album.css" rel="stylesheet"> -->
+</head>
+
+<body>
+
+    <div class="jumbotron">
+        <div class="container">
+            <div class="starter-template">
+                <h1>Likes Per Account</h1>
+                <p class="lead"> </p>
+                <!-- <p> Tech stack: Flask, PostgreSQL, SQLAlchemy </p> -->
+            </div>
+        </div>
+    </div>
+
+
+    <div class="container" style="padding-top: 10px; padding-bottom: 15px;">
+
+        <div class="row justify-content-center">
+
+            {% if show_dataset_table %}
+            <div class="col-md-2 text-center">
+                <a class="btn btn-secondary" data-toggle="collapse" href="#source_dataset_table" role="button"
+                    aria-expanded="false" aria-controls="source_dataset_table">
+                    Show selected source datasets
+                </a>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+
+
+    <div class="album py-5 bg-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card mb-4 shadow-sm">
+                        <img src="{{ hd_profile_pic_dict.hd_profile_pic_url }}" width="348">
+                        <div class="card-body">
+                            <p class="font-weight-bold">{{ hd_profile_pic_dict.full_name }}
+                            </p>
+                            <p class="card-text">is private: {{ hd_profile_pic_dict.is_private }}</p>
+                            <p class="card-text">is business account: {{ hd_profile_pic_dict.is_business }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn-group">
+                                    <a href="{{ hd_profile_pic_dict.profile_url }}" class="btn btn-primary">
+                                        <span class="glyphicon glyphicon-th-list"></span> View
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary">Edit</button>
+                                </div>
+                                <small class="text-muted">{{ hd_profile_pic_dict.username }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+</body>
+
+</html>
