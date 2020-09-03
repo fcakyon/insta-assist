@@ -1,3 +1,4 @@
+import os
 import config
 from utils import (
     get_userid_from_username,
@@ -5,6 +6,7 @@ from utils import (
     get_liked_media_list_from_username,
     delay,
     save_json,
+    get_liked_media_dict_path,
 )
 from InstagramAPI import InstagramAPI
 import time
@@ -18,5 +20,5 @@ igapi.login()
 username = config.target_username
 liked_media_dict = get_liked_media_list_from_username(igapi, username)
 
-json_path = config.json_path
-save_json(liked_media_dict, json_path)
+liked_media_dict_path = get_liked_media_dict_path(username)
+save_json(liked_media_dict, liked_media_dict_path)

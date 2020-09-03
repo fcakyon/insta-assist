@@ -64,6 +64,9 @@ def get_userid_from_username(igapi, username):
 
 
 def get_all_followings(igapi, target_userid):
+    """
+    Returns a list of {"username": "", "userid": 0, "is_private": false, "full_name": ""}
+    """
     following_list = []
     current_followings_list = igapi.getTotalFollowings(target_userid)
     for following in current_followings_list:
@@ -78,6 +81,11 @@ def get_all_followings(igapi, target_userid):
 
 
 def get_following_liked_medias(igapi, following_list, target_username):
+    """
+    each element in following_list should have the form: {"username": "", "userid": 0, "is_private": false, "full_name": ""}
+
+    Returns {"full": full_liked_media_list, "clean": clean_liked_media_list}
+    """
     full_liked_media_list = []
     clean_liked_media_list = []
     for following in following_list:
@@ -104,6 +112,7 @@ def get_following_liked_medias(igapi, following_list, target_username):
                         clean_media = {
                             "media_id": item["pk"],
                             "username": item["user"]["username"],
+                            "user_id": item["user"]["pk"],
                             "full_name": item["user"]["full_name"],
                             "profile_pic_url": item["user"]["profile_pic_url"],
                             "timestamp": item["taken_at"],
@@ -121,6 +130,9 @@ def get_following_liked_medias(igapi, following_list, target_username):
 
 
 def get_liked_media_list_from_username(igapi, username):
+    """
+    Returns {"full": full_liked_media_list, "clean": clean_liked_media_list}
+    """
     userid = get_userid_from_username(igapi, username)
     following_list = get_all_followings(igapi, userid)
     liked_media_dict = get_following_liked_medias(igapi, following_list, username)
@@ -146,3 +158,49 @@ def create_dir(_dir):
     """
     if not os.path.exists(_dir):
         os.makedirs(_dir)
+
+
+def get_liked_media_dict_path(username):
+    liked_media_dict_path = os.path.join("data", username, "liked_media_dict.json")
+    return liked_media_dict_path
+
+
+def get_user_likes_per_account(liked_media_dict):
+    """
+    Returns a list of {"username": "", "number_of_liked_posts": 0, "liked_media_list": [], "profile_pic_url": "", "profile_url": ""}
+    """
+    liked_media_list = liked_media_dict["clean"]
+    # create dict with structure: {username: {"liked_media_list": []}}
+    user_likes_per_account = dict()
+    for liked_media in liked_media_list:
+        liked_username = liked_media["username"]
+        if liked_username not in user_likes_per_account.keys():
+            user_likes_per_account[liked_username] = {"liked_media_list": [liked_media]}
+        else:
+            user_likes_per_account[liked_username]["liked_media_list"].append(
+                liked_media
+            )
+    # create dict with structure: {username: {"liked_media_list": [], "number_of_liked_posts": 0}}
+    for liked_username in user_likes_per_account.keys():
+        user_likes_per_account[liked_username]["number_of_liked_posts"] = len(
+            user_likes_per_account[liked_username]["liked_media_list"]
+        )
+    # create list with structure: [{"username": "", "number_of_liked_posts": 0}]
+    user_likes_per_account_list = [
+        {
+            "username": liked_username,
+            "number_of_liked_posts": user_likes_per_account[liked_username][
+                "number_of_liked_posts"
+            ],
+            "profile_pic_url": user_likes_per_account[liked_username][
+                "liked_media_list"
+            ][0]["profile_pic_url"],
+            "profile_url": "https://www.instagram.com/" + liked_username,
+            "liked_media_list": user_likes_per_account[liked_username][
+                "liked_media_list"
+            ],
+        }
+        for liked_username in user_likes_per_account
+    ]
+
+    return user_likes_per_account_list
